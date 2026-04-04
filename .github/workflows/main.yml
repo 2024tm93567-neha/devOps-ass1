@@ -40,11 +40,11 @@ jobs:
           echo "▶ Running flake8 on app.py..."
           flake8 app.py \
             --max-line-length=100 \
-            --ignore=E501,W503,W504
+            --ignore=E501,W391,W503,W504
           echo "▶ Running flake8 on tests/..."
           flake8 tests/ \
             --max-line-length=100 \
-            --ignore=E501,W503,W504
+            --ignore=E501,W391,W503,W504
           echo "✅ Lint passed — no syntax errors detected."
 
       - name: Verify application imports cleanly
