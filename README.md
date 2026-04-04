@@ -42,7 +42,7 @@ ACEest Fitness & Gym is a rapidly scaling startup. This repository contains the 
 ## Application Architecture
 
 ```
-aceest-fitness-devops/
+devOps-ass1
 ├── app.py                        ← Flask application (factory pattern)
 │   ├── PROGRAMS                  ← Static fitness programme catalogue
 │   ├── calculate_bmi()           ← Pure business-logic function
@@ -365,7 +365,7 @@ Both systems enforce the **same quality gates** (lint → Docker build → pytes
 ## Project Structure
 
 ```
-aceest-fitness-devops/
+devOps-aa1
 ├── .github/
 │   └── workflows/
 │       └── main.yml          ← GitHub Actions CI/CD (4 jobs)
