@@ -1,0 +1,79 @@
+# ─────────────────────────────────────────────────────────────────────────────
+# Blue-Green Deployment — BLUE (stable / current production)
+#
+# STRATEGY:
+#   Two identical environments (Blue=current, Green=new) run simultaneously.
+#   Traffic switches from Blue → Green instantly by updating the Service selector.
+#   Rollback = switch selector back to blue.
+#
+# USAGE:
+#   kubectl apply -f k8s/blue-green/deployment-blue.yaml
+#   kubectl apply -f k8s/blue-green/deployment-green.yaml
+#   kubectl apply -f k8s/blue-green/service.yaml          # points to blue
+#   # After validating Green:
+#   kubectl patch service aceest-fitness-svc \
+#     -n aceest-fitness \
+#     -p '{"spec":{"selector":{"slot":"green"}}}'
+# ─────────────────────────────────────────────────────────────────────────────
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: aceest-fitness-blue
+  namespace: aceest-fitness
+  labels:
+    app: aceest-fitness
+    slot: blue
+    version: "3.2.4"
+    app.kubernetes.io/name: aceest-fitness
+    app.kubernetes.io/version: "3.2.4"
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: aceest-fitness
+      slot: blue
+  template:
+    metadata:
+      labels:
+        app: aceest-fitness
+        slot: blue
+        version: "3.2.4"
+    spec:
+      containers:
+        - name: aceest-fitness
+          image: nehaRTonpe/aceest-fitness:3.2.4    # ← current stable
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 5000
+              name: http
+          envFrom:
+            - configMapRef:
+                name: aceest-config
+          readinessProbe:
+            httpGet:
+              path: /api/health
+              port: 5000
+            initialDelaySeconds: 10
+            periodSeconds: 5
+            failureThreshold: 3
+          livenessProbe:
+            httpGet:
+              path: /api/health
+              port: 5000
+            initialDelaySeconds: 20
+            periodSeconds: 15
+            failureThreshold: 3
+          resources:
+            requests:
+              memory: "128Mi"
+              cpu: "100m"
+            limits:
+              memory: "256Mi"
+              cpu: "250m"
+          volumeMounts:
+            - name: data-volume
+              mountPath: /data
+      volumes:
+        - name: data-volume
+          emptyDir: {}
+      terminationGracePeriodSeconds: 30
