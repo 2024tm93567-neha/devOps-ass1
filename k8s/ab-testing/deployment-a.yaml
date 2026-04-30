@@ -39,7 +39,7 @@ spec:
     spec:
       containers:
         - name: aceest-fitness
-          image: nehaRTonpe/aceest-fitness:3.2.4    # ← Variant A (control)
+          image: nehartonpe/aceest-fitness:3.2.4    # ← Variant A (control)
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 5000
