@@ -1,38 +1,56 @@
-# ─── Python ───────────────────────────────────────────────────────────────────
+# ─────────────────────────────────────────────────────────────────────────────
+# .gitignore — ACEest Fitness & Gym DevOps Project
+# ─────────────────────────────────────────────────────────────────────────────
+
+# Python
 __pycache__/
 *.py[cod]
-*.pyo
-*.pyd
-*.pyc
+*$py.class
+*.so
+.Python
+.venv/
+venv/
+env/
 *.egg-info/
 dist/
 build/
-*.egg
-.eggs/
+.pytest_cache/
+.coverage
+coverage.xml
+htmlcov/
 
-# ─── Virtual environments ─────────────────────────────────────────────────────
-venv/
-.venv/
-env/
-ENV/
-
-# ─── Runtime database (created on first run — not committed) ─────────────────
+# Database files (never commit runtime databases)
 *.db
 *.sqlite
 *.sqlite3
 
-# ─── Test artefacts ───────────────────────────────────────────────────────────
-.pytest_cache/
-.coverage
-htmlcov/
-test-results.xml
-coverage.xml
-.tox/
-
-# ─── IDE / OS ─────────────────────────────────────────────────────────────────
-.vscode/
-.idea/
-*.DS_Store
+# OS
+.DS_Store
+.DS_Store?
+._*
 Thumbs.db
+desktop.ini
+
+# IDE
+.idea/
+.vscode/
 *.swp
 *.swo
+
+# Docker
+*.tar
+*.tar.gz
+
+# Jenkins
+.jenkins/
+
+# SonarQube
+.sonar/
+.scannerwork/
+
+# Secrets — NEVER commit these
+*.env
+.env
+.env.local
+secrets.yaml
+kubeconfig.yaml
