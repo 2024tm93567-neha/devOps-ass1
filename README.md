@@ -61,10 +61,10 @@ pytest tests/ -v --cov=app --cov-report=term-missing
 
 ```bash
 # Build
-docker build -t nehaRTonpe/aceest-fitness:3.2.4 .
+docker build -t nehartonpe/aceest-fitness:3.2.4 .
 
 # Run
-docker run -p 5000:5000 nehaRTonpe/aceest-fitness:3.2.4
+docker run -p 5000:5000 nehartonpe/aceest-fitness:3.2.4
 
 # Test
 curl http://localhost:5000/api/health
