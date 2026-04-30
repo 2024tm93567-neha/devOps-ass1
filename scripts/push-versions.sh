@@ -10,11 +10,11 @@
 # PREREQUISITE: docker login must already be done (Jenkins handles this).
 #
 # USAGE:
-#   DOCKERHUB_USER=nehaRTonpe bash scripts/push-versions.sh
+#   DOCKERHUB_USER=nehartonpe bash scripts/push-versions.sh
 # ─────────────────────────────────────────────────────────────────────────────
 set -euo pipefail
 
-DOCKERHUB_USER="${DOCKERHUB_USER:-nehaRTonpe}"
+DOCKERHUB_USER="${DOCKERHUB_USER:-nehartonpe}"
 APP_NAME="aceest-fitness"
 REGISTRY="${DOCKERHUB_USER}/${APP_NAME}"
 
