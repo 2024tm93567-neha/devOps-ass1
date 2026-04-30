@@ -9,7 +9,7 @@
 # UPDATE USAGE:
 #   # Update image to new version:
 #   kubectl set image deployment/aceest-fitness-rolling \
-#     aceest-fitness=nehaRTonpe/aceest-fitness:3.2.5 \
+#     aceest-fitness=nehartonpe/aceest-fitness:3.2.5 \
 #     -n aceest-fitness
 #   # Watch rollout:
 #   kubectl rollout status deployment/aceest-fitness-rolling -n aceest-fitness
@@ -47,7 +47,7 @@ spec:
     spec:
       containers:
         - name: aceest-fitness
-          image: nehaRTonpe/aceest-fitness:3.2.4
+          image: nehartonpe/aceest-fitness:3.2.4
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 5000
