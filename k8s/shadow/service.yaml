@@ -1,0 +1,71 @@
+# ─────────────────────────────────────────────────────────────────────────────
+# Shadow Services — two separate services so traffic mirroring can target each
+#
+# With Istio VirtualService + HTTPMirror, production traffic is sent to
+# aceest-fitness-prod-svc, and a mirror copy goes to aceest-fitness-shadow-svc.
+# ─────────────────────────────────────────────────────────────────────────────
+# Production Service — receives real traffic
+apiVersion: v1
+kind: Service
+metadata:
+  name: aceest-fitness-prod-svc
+  namespace: aceest-fitness
+  labels:
+    app: aceest-fitness
+    track: production
+spec:
+  type: NodePort
+  selector:
+    app: aceest-fitness
+    track: production
+  ports:
+    - name: http
+      protocol: TCP
+      port: 80
+      targetPort: 5000
+      nodePort: 30083
+---
+# Shadow Service — receives mirrored copy of traffic (responses discarded)
+apiVersion: v1
+kind: Service
+metadata:
+  name: aceest-fitness-shadow-svc
+  namespace: aceest-fitness
+  labels:
+    app: aceest-fitness
+    track: shadow
+  annotations:
+    deployment-strategy: shadow
+spec:
+  type: ClusterIP                 # shadow need not be externally reachable
+  selector:
+    app: aceest-fitness
+    track: shadow
+  ports:
+    - name: http
+      protocol: TCP
+      port: 80
+      targetPort: 5000
+---
+# ── Istio VirtualService for traffic mirroring (requires Istio installed) ───
+# Uncomment if Istio is available in your cluster
+# apiVersion: networking.istio.io/v1alpha3
+# kind: VirtualService
+# metadata:
+#   name: aceest-fitness-mirror
+#   namespace: aceest-fitness
+# spec:
+#   hosts:
+#     - aceest-fitness-prod-svc
+#   http:
+#     - route:
+#         - destination:
+#             host: aceest-fitness-prod-svc
+#             port:
+#               number: 80
+#       mirror:
+#         host: aceest-fitness-shadow-svc
+#         port:
+#           number: 80
+#       mirrorPercentage:
+#         value: 100.0            # mirror 100% of requests to shadow
