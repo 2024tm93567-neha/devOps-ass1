@@ -24,7 +24,7 @@ pipeline {
     environment {
         APP_NAME       = "aceest-fitness"
         APP_VERSION    = "3.2.4"
-        DOCKERHUB_USER = "nehaRTonpe"                          // ← your Docker Hub username
+        DOCKERHUB_USER = "nehartonpe"                          // ← your Docker Hub username
         IMAGE_BASE     = "${DOCKERHUB_USER}/${APP_NAME}"
         IMAGE_TAG      = "${IMAGE_BASE}:${APP_VERSION}"
         IMAGE_BUILD    = "${IMAGE_BASE}:build-${BUILD_NUMBER}"
