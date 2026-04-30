@@ -1,1 +1,1 @@
-# ACEest Fitness & Gym — test package
+# tests package — ACEest Fitness pytest suite
