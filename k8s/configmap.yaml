@@ -1,0 +1,15 @@
+# ─────────────────────────────────────────────────────────────────────────────
+# ConfigMap — Shared environment configuration for all ACEest pods
+# DRY: all deployments reference this single ConfigMap — no repeated env vars.
+# ─────────────────────────────────────────────────────────────────────────────
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: aceest-config
+  namespace: aceest-fitness
+  labels:
+    app.kubernetes.io/name: aceest-fitness
+data:
+  FLASK_DEBUG: "false"
+  PORT: "5000"
+  DATABASE_URL: "/data/aceest_fitness.db"
