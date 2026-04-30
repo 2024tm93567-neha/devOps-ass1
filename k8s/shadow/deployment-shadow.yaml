@@ -1,0 +1,60 @@
+# ─────────────────────────────────────────────────────────────────────────────
+# Shadow Deployment — SHADOW (receives mirrored traffic — responses discarded)
+#
+# The shadow receives a copy of every request sent to production.
+# Responses from shadow pods are NOT returned to users.
+# Used to test the new version under real production load safely.
+# ─────────────────────────────────────────────────────────────────────────────
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: aceest-fitness-shadow
+  namespace: aceest-fitness
+  labels:
+    app: aceest-fitness
+    track: shadow
+    version: "3.2.5"
+  annotations:
+    deployment.kubernetes.io/shadow: "true"
+spec:
+  replicas: 2                     # shadow needs enough capacity to absorb mirrored load
+  selector:
+    matchLabels:
+      app: aceest-fitness
+      track: shadow
+  template:
+    metadata:
+      labels:
+        app: aceest-fitness
+        track: shadow
+        version: "3.2.5"
+    spec:
+      containers:
+        - name: aceest-fitness
+          image: nehaRTonpe/aceest-fitness:3.2.5   # ← version under test
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 5000
+              name: http
+          envFrom:
+            - configMapRef:
+                name: aceest-config
+          readinessProbe:
+            httpGet:
+              path: /api/health
+              port: 5000
+            initialDelaySeconds: 10
+            periodSeconds: 5
+          resources:
+            requests:
+              memory: "128Mi"
+              cpu: "100m"
+            limits:
+              memory: "256Mi"
+              cpu: "250m"
+          volumeMounts:
+            - name: data-volume
+              mountPath: /data
+      volumes:
+        - name: data-volume
+          emptyDir: {}
