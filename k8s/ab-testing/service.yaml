@@ -1,0 +1,100 @@
+# ─────────────────────────────────────────────────────────────────────────────
+# A/B Testing Services — one per variant + Ingress for header/cookie routing
+#
+# With nginx-ingress:
+#   All users → variant-a by default
+#   Users with Cookie "ab_group=b" → variant-b
+# ─────────────────────────────────────────────────────────────────────────────
+# Variant A Service (Control) — NodePort 30084 for local Minikube access
+apiVersion: v1
+kind: Service
+metadata:
+  name: aceest-fitness-variant-a-svc
+  namespace: aceest-fitness
+  labels:
+    app: aceest-fitness
+    variant: a
+spec:
+  type: NodePort
+  selector:
+    app: aceest-fitness
+    variant: a
+  ports:
+    - name: http
+      protocol: TCP
+      port: 80
+      targetPort: 5000
+      nodePort: 30084
+      targetPort: 5000
+---
+# Variant B Service (Experiment)
+apiVersion: v1
+kind: Service
+metadata:
+  name: aceest-fitness-variant-b-svc
+  namespace: aceest-fitness
+  labels:
+    app: aceest-fitness
+    variant: b
+spec:
+  type: ClusterIP
+  selector:
+    app: aceest-fitness
+    variant: b
+  ports:
+    - name: http
+      protocol: TCP
+      port: 80
+      targetPort: 5000
+---
+# ── Ingress with cookie-based A/B routing (nginx-ingress) ───────────────────
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: aceest-fitness-ab-ingress
+  namespace: aceest-fitness
+  labels:
+    app: aceest-fitness
+  annotations:
+    nginx.ingress.kubernetes.io/use-regex: "true"
+    # Route users with cookie ab_group=b to variant-b
+    nginx.ingress.kubernetes.io/canary: "true"
+    nginx.ingress.kubernetes.io/canary-by-cookie: "ab_group"
+    nginx.ingress.kubernetes.io/canary-by-cookie-value: "b"
+spec:
+  ingressClassName: nginx
+  rules:
+    - host: aceest.local
+      http:
+        paths:
+          # Default → Variant A (control)
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: aceest-fitness-variant-a-svc
+                port:
+                  number: 80
+---
+# Canary Ingress for Variant B (nginx canary annotation approach)
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: aceest-fitness-ab-canary-ingress
+  namespace: aceest-fitness
+  annotations:
+    nginx.ingress.kubernetes.io/canary: "true"
+    nginx.ingress.kubernetes.io/canary-by-cookie: "ab_group"
+spec:
+  ingressClassName: nginx
+  rules:
+    - host: aceest.local
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: aceest-fitness-variant-b-svc
+                port:
+                  number: 80
