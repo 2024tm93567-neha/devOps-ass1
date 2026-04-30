@@ -28,7 +28,7 @@ spec:
     spec:
       containers:
         - name: aceest-fitness
-          image: nehaRTonpe/aceest-fitness:3.2.5   # ← candidate version
+          image: nehartonpe/aceest-fitness:3.2.5   # ← candidate version
           imagePullPolicy: Always
           ports:
             - containerPort: 5000
