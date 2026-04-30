@@ -1,0 +1,76 @@
+# ─────────────────────────────────────────────────────────────────────────────
+# A/B Testing — Variant A (Control Group — current stable version)
+#
+# STRATEGY:
+#   Two versions run simultaneously. Traffic is split based on header/cookie
+#   routing (requires Ingress or Istio). Variant A = control; Variant B = experiment.
+#   Analyse metrics (conversion rate, error rate) → pick winner → promote.
+#
+# Unlike canary (% of all traffic), A/B testing targets specific user segments
+# (e.g. users with X-AB-Test: B header, or cookie ab_group=b).
+#
+# USAGE (with nginx-ingress):
+#   kubectl apply -f k8s/ab-testing/
+#   # Nginx ingress routes "ab_group=b" cookie to variant-b service
+#   # All other traffic goes to variant-a
+# ─────────────────────────────────────────────────────────────────────────────
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: aceest-fitness-variant-a
+  namespace: aceest-fitness
+  labels:
+    app: aceest-fitness
+    variant: a
+    version: "3.2.4"
+    ab-test: "true"
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: aceest-fitness
+      variant: a
+  template:
+    metadata:
+      labels:
+        app: aceest-fitness
+        variant: a
+        version: "3.2.4"
+    spec:
+      containers:
+        - name: aceest-fitness
+          image: nehaRTonpe/aceest-fitness:3.2.4    # ← Variant A (control)
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 5000
+          env:
+            - name: AB_VARIANT
+              value: "A"                              # exposed so app can log variant
+          envFrom:
+            - configMapRef:
+                name: aceest-config
+          readinessProbe:
+            httpGet:
+              path: /api/health
+              port: 5000
+            initialDelaySeconds: 10
+            periodSeconds: 5
+          livenessProbe:
+            httpGet:
+              path: /api/health
+              port: 5000
+            initialDelaySeconds: 20
+            periodSeconds: 15
+          resources:
+            requests:
+              memory: "128Mi"
+              cpu: "100m"
+            limits:
+              memory: "256Mi"
+              cpu: "250m"
+          volumeMounts:
+            - name: data-volume
+              mountPath: /data
+      volumes:
+        - name: data-volume
+          emptyDir: {}
