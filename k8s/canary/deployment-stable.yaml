@@ -15,7 +15,7 @@
 #   kubectl apply -f k8s/canary/service.yaml
 #   # Monitor → then promote:
 #   kubectl set image deployment/aceest-fitness-stable \
-#     aceest-fitness=nehaRTonpe/aceest-fitness:3.2.5 -n aceest-fitness
+#     aceest-fitness=nehartonpe/aceest-fitness:3.2.5 -n aceest-fitness
 # ─────────────────────────────────────────────────────────────────────────────
 apiVersion: apps/v1
 kind: Deployment
@@ -41,7 +41,7 @@ spec:
     spec:
       containers:
         - name: aceest-fitness
-          image: nehaRTonpe/aceest-fitness:3.2.4
+          image: nehartonpe/aceest-fitness:3.2.4
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 5000
