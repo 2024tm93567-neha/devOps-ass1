@@ -14,7 +14,7 @@
 set -euo pipefail
 
 APP_VERSION="${1:-3.2.4}"
-DOCKERHUB_USER="${2:-nehaRTonpe}"
+DOCKERHUB_USER="${2:-nehartonpe}"
 APP_NAME="aceest-fitness"
 REGISTRY="docker.io/${DOCKERHUB_USER}/${APP_NAME}"
 IMAGE_TAG="${REGISTRY}:${APP_VERSION}"
