@@ -1,0 +1,67 @@
+# ─────────────────────────────────────────────────────────────────────────────
+# Blue-Green Deployment — GREEN (new / candidate version)
+#
+# Deploy green first, validate it, then switch the service selector to green.
+# ─────────────────────────────────────────────────────────────────────────────
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: aceest-fitness-green
+  namespace: aceest-fitness
+  labels:
+    app: aceest-fitness
+    slot: green
+    version: "3.2.5"                                  # ← next version
+    app.kubernetes.io/name: aceest-fitness
+    app.kubernetes.io/version: "3.2.5"
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: aceest-fitness
+      slot: green
+  template:
+    metadata:
+      labels:
+        app: aceest-fitness
+        slot: green
+        version: "3.2.5"
+    spec:
+      containers:
+        - name: aceest-fitness
+          image: nehaRTonpe/aceest-fitness:3.2.5    # ← candidate image
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 5000
+              name: http
+          envFrom:
+            - configMapRef:
+                name: aceest-config
+          readinessProbe:
+            httpGet:
+              path: /api/health
+              port: 5000
+            initialDelaySeconds: 10
+            periodSeconds: 5
+            failureThreshold: 3
+          livenessProbe:
+            httpGet:
+              path: /api/health
+              port: 5000
+            initialDelaySeconds: 20
+            periodSeconds: 15
+            failureThreshold: 3
+          resources:
+            requests:
+              memory: "128Mi"
+              cpu: "100m"
+            limits:
+              memory: "256Mi"
+              cpu: "250m"
+          volumeMounts:
+            - name: data-volume
+              mountPath: /data
+      volumes:
+        - name: data-volume
+          emptyDir: {}
+      terminationGracePeriodSeconds: 30
