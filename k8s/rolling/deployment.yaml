@@ -1,0 +1,106 @@
+# ─────────────────────────────────────────────────────────────────────────────
+# Rolling Update Deployment — ACEest Fitness
+#
+# STRATEGY:
+#   Kubernetes replaces pods one at a time (maxSurge=1, maxUnavailable=0).
+#   Zero downtime: new pods become ready before old ones are terminated.
+#   Built-in Kubernetes default — simplest strategy.
+#
+# UPDATE USAGE:
+#   # Update image to new version:
+#   kubectl set image deployment/aceest-fitness-rolling \
+#     aceest-fitness=nehaRTonpe/aceest-fitness:3.2.5 \
+#     -n aceest-fitness
+#   # Watch rollout:
+#   kubectl rollout status deployment/aceest-fitness-rolling -n aceest-fitness
+#   # Rollback:
+#   kubectl rollout undo deployment/aceest-fitness-rolling -n aceest-fitness
+# ─────────────────────────────────────────────────────────────────────────────
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: aceest-fitness-rolling
+  namespace: aceest-fitness
+  labels:
+    app: aceest-fitness
+    strategy: rolling
+    version: "3.2.4"
+  annotations:
+    kubernetes.io/change-cause: "Rolling update to v3.2.4"
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: aceest-fitness
+      strategy: rolling
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1           # max pods above desired count during update
+      maxUnavailable: 0     # no pods go down before replacements are ready
+  template:
+    metadata:
+      labels:
+        app: aceest-fitness
+        strategy: rolling
+        version: "3.2.4"
+    spec:
+      containers:
+        - name: aceest-fitness
+          image: nehaRTonpe/aceest-fitness:3.2.4
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 5000
+              name: http
+          envFrom:
+            - configMapRef:
+                name: aceest-config
+          readinessProbe:
+            httpGet:
+              path: /api/health
+              port: 5000
+            initialDelaySeconds: 10
+            periodSeconds: 5
+            failureThreshold: 3
+          livenessProbe:
+            httpGet:
+              path: /api/health
+              port: 5000
+            initialDelaySeconds: 20
+            periodSeconds: 15
+            failureThreshold: 3
+          resources:
+            requests:
+              memory: "128Mi"
+              cpu: "100m"
+            limits:
+              memory: "256Mi"
+              cpu: "250m"
+          volumeMounts:
+            - name: data-volume
+              mountPath: /data
+      volumes:
+        - name: data-volume
+          emptyDir: {}
+      terminationGracePeriodSeconds: 30
+---
+# ── Service for Rolling Deployment ──────────────────────────────────────────
+apiVersion: v1
+kind: Service
+metadata:
+  name: aceest-fitness-rolling-svc
+  namespace: aceest-fitness
+  labels:
+    app: aceest-fitness
+    strategy: rolling
+spec:
+  type: NodePort
+  selector:
+    app: aceest-fitness
+    strategy: rolling
+  ports:
+    - name: http
+      protocol: TCP
+      port: 80
+      targetPort: 5000
+      nodePort: 30082
