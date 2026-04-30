@@ -1,0 +1,82 @@
+# ─────────────────────────────────────────────────────────────────────────────
+# HorizontalPodAutoscaler — ACEest Fitness
+#
+# Automatically scales pods based on CPU utilisation.
+# Works with Rolling and Canary deployments.
+# Requires metrics-server: minikube addons enable metrics-server
+#
+# USAGE:
+#   kubectl apply -f k8s/hpa.yaml
+#   kubectl get hpa -n aceest-fitness
+# ─────────────────────────────────────────────────────────────────────────────
+
+# ── HPA for Rolling deployment ───────────────────────────────────────────────
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: aceest-fitness-rolling-hpa
+  namespace: aceest-fitness
+  labels:
+    app: aceest-fitness
+    strategy: rolling
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: aceest-fitness-rolling
+  minReplicas: 2
+  maxReplicas: 10
+  metrics:
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: 70       # scale up when CPU > 70%
+    - type: Resource
+      resource:
+        name: memory
+        target:
+          type: Utilization
+          averageUtilization: 80       # scale up when memory > 80%
+  behavior:
+    scaleUp:
+      stabilizationWindowSeconds: 30   # react quickly to load spikes
+      policies:
+        - type: Pods
+          value: 2
+          periodSeconds: 60
+    scaleDown:
+      stabilizationWindowSeconds: 300  # wait 5 min before scaling down
+      policies:
+        - type: Pods
+          value: 1
+          periodSeconds: 60
+---
+# ── HPA for Canary stable deployment ─────────────────────────────────────────
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: aceest-fitness-stable-hpa
+  namespace: aceest-fitness
+  labels:
+    app: aceest-fitness
+    strategy: canary
+    track: stable
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: aceest-fitness-stable
+  minReplicas: 3
+  maxReplicas: 15
+  metrics:
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: 70
+  behavior:
+    scaleDown:
+      stabilizationWindowSeconds: 300
