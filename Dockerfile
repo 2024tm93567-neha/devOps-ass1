@@ -12,6 +12,7 @@
 FROM python:3.11-slim
 
 # ── OS-level hygiene ──────────────────────────────────────────────────────────
+# Install only what is strictly necessary and clean package cache in one layer.
 RUN apt-get update \
     && apt-get install -y --no-install-recommends curl \
     && rm -rf /var/lib/apt/lists/*
