@@ -28,7 +28,7 @@ set -euo pipefail
 STRATEGY="${1:-rolling}"
 APP_NAME="aceest-fitness"
 NAMESPACE="aceest-fitness"
-IMAGE="nehaRTonpe/aceest-fitness:3.2.4"
+IMAGE="nehartonpe/aceest-fitness:3.2.4"
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 K8S_DIR="${SCRIPT_DIR}/../k8s"
 
