@@ -1,0 +1,63 @@
+# ─────────────────────────────────────────────────────────────────────────────
+# Canary Deployment — CANARY (10 % of traffic — new version under test)
+# ─────────────────────────────────────────────────────────────────────────────
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: aceest-fitness-canary
+  namespace: aceest-fitness
+  labels:
+    app: aceest-fitness
+    track: canary
+    version: "3.2.5"
+  annotations:
+    deployment.kubernetes.io/canary: "true"
+    deployment.kubernetes.io/canary-weight: "10"
+spec:
+  replicas: 1                     # ← 10% of traffic (1 of 10 total pods)
+  selector:
+    matchLabels:
+      app: aceest-fitness
+      track: canary
+  template:
+    metadata:
+      labels:
+        app: aceest-fitness
+        track: canary
+        version: "3.2.5"
+    spec:
+      containers:
+        - name: aceest-fitness
+          image: nehaRTonpe/aceest-fitness:3.2.5   # ← candidate version
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 5000
+          envFrom:
+            - configMapRef:
+                name: aceest-config
+          readinessProbe:
+            httpGet:
+              path: /api/health
+              port: 5000
+            initialDelaySeconds: 10
+            periodSeconds: 5
+            failureThreshold: 3
+          livenessProbe:
+            httpGet:
+              path: /api/health
+              port: 5000
+            initialDelaySeconds: 20
+            periodSeconds: 15
+          resources:
+            requests:
+              memory: "128Mi"
+              cpu: "100m"
+            limits:
+              memory: "256Mi"
+              cpu: "250m"
+          volumeMounts:
+            - name: data-volume
+              mountPath: /data
+      volumes:
+        - name: data-volume
+          emptyDir: {}
