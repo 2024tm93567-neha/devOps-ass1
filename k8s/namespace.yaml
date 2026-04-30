@@ -1,0 +1,12 @@
+# ─────────────────────────────────────────────────────────────────────────────
+# Kubernetes Namespace — aceest-fitness
+# All ACEest Fitness deployments live inside this namespace for isolation.
+# ─────────────────────────────────────────────────────────────────────────────
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: aceest-fitness
+  labels:
+    app.kubernetes.io/name: aceest-fitness
+    app.kubernetes.io/managed-by: kubectl
+    environment: production
