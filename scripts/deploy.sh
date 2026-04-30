@@ -15,7 +15,7 @@
 set -euo pipefail
 
 STRATEGY="${1:-rolling}"
-IMAGE_TAG="${2:-nehaRTonpe/aceest-fitness:3.2.4}"
+IMAGE_TAG="${2:-nehartonpe/aceest-fitness:3.2.4}"
 NAMESPACE="aceest-fitness"
 APP_NAME="aceest-fitness"
 K8S_DIR="$(dirname "$0")/../k8s"
